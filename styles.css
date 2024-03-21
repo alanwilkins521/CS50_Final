@@ -7,3 +7,7 @@ body {
 img {
     margin: 0.6%;
 }
+
+.selected {
+    border: 2px solid yellow;
+}
