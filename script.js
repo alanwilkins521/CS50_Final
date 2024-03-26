@@ -1,31 +1,26 @@
-let roundScore = 0;
 let totalScore = 0;
-let cpuScore = 0;
+const rollSound = new Audio("dice-rolling.mp3");
 let currentDice = [];
-
 
 function rollDie() {
     return Math.floor(Math.random() * 6) + 1;
 }
 
 function rollAllDice() {
-    let dice = [];
-    for (let i = 0; i < 6; i++) {
-        if (!currentDice[i].keep) {
-            dice.push(rollDie());
+    currentDice.forEach((die) => {
+        if (!die.keep) {
+            die.value = rollDie();
         }
-        else {
-            dice.push(currentDice[i].value);
-        }
-    }
-    return dice;
+    });
+    displayDice();
+    rollSound.play();
 }
-
+ 
 function displayDice() {
     const diceContainer = document.getElementById("dice-container");
     diceContainer.innerHTML = "";
 
-    currentDice.forEach((die, index) => {
+    currentDice.forEach((die ,index) => {
         const dieImg = document.createElement("img");
         dieImg.src = `Die${die.value}.png`;
         dieImg.classList.add("die");
@@ -37,11 +32,32 @@ function displayDice() {
         dieImg.addEventListener("click", () => {
             currentDice[index].keep = !currentDice[index].keep;
             displayDice();
+            calculateScore();
         });
 
         diceContainer.appendChild(dieImg);
     });
 }
+
+function calculateScore() {
+    roundScore = 0;
+    keptDie = 0;
+    currentDice.forEach((die) => {
+        if (die.keep) {
+            keptDie += 1;
+            if (die.value === 5) {
+                roundScore += 50;
+                
+            }
+            else if (die.value === 1) {
+                roundScore += 100;
+            }
+        }
+    }
+    );
+    updateScoreDisplay();
+    }
+
 
 function updateScoreDisplay() {
     const currentScoreElement = document.getElementById("round_score");
@@ -53,20 +69,26 @@ function updateScoreDisplay() {
     cpuScoreElement.innerHTML = cpuScore;
 }
 
-function rollDice() {
-    currentDice = [
-        { value: rollDie(), keep: false },
-        { value: rollDie(), keep: false },
-        { value: rollDie(), keep: false },
-        { value: rollDie(), keep: false },
-        { value: rollDie(), keep: false },
-        { value: rollDie(), keep: false }
-    ];
-    displayDice();
-
-    const rollSound = new Audio("dice-rolling.mp3");
-    rollSound.play();
+function initializeGame() {
+    for (i = 0; i < 6; i++) {
+        currentDice.push({ value: rollDie(), keep: false });
+    }
 }
 
-document.getElementById("roll").addEventListener("click",rollDice);
+document.getElementById("roll").addEventListener("click", function() {
+    if (currentDice.length == 0) {
+        initializeGame();
+    }
+    rollAllDice();
+});
+
+document.getElementById("pass").addEventListener("click", function() {
+    totalScore += roundScore;
+    roundScore = 0;
+    currentDice = [];
+    rollAllDice();
+    displayDice();
+});
+
+displayDice();
 updateScoreDisplay();
