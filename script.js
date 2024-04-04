@@ -1,4 +1,5 @@
 let totalScore = 0;
+let realRoundScore = 0;
 let roundScore = 0;
 let cpuScore = 0;
 const rollSound = new Audio("dice-rolling.mp3");
@@ -23,8 +24,10 @@ function freshDice() {
         die.keep = false;
         die.value = rollDie();
     })
+
     alert("Fresh dice!");
     updateScoreDisplay();
+    displayDice();
 }
 
 function endTurn() {
@@ -56,7 +59,6 @@ function displayDice() {
 
 function calculateScore() {
     roundScore = 0;
-    let straight = false;
 
     // Filter out only the selected dice
     const selectedDice = currentDice.filter(die => die.keep);
@@ -65,47 +67,50 @@ function calculateScore() {
     const sortedDice = selectedDice.map(die => die.value).sort((a, b) => a - b);
 
     if (sortedDice.join('') === '123456') {
-        straight = true;
         roundScore += 1500;
         updateScoreDisplay();
         displayDice();
         freshDice();
+        return;
     }
-
+    
     // Count occurrences of each value in selected dice
     const counts = {};
     for (const die of selectedDice) {
         counts[die.value] = counts[die.value] ? counts[die.value] + 1 : 1;
     }
 
-    const pairs = Object.values(counts).filter(count => count === 2).length;
-    if (pairs === 3) {
-        roundScore += 2500;
-        freshDice();
+    for (const value in counts) {
+        if (counts[value] < 3) {
+            if (value == 1) {
+                roundScore += counts[value] * 100;
+            }
+            else if (value == 5) {
+                roundScore += counts[value] * 50;
+            }
+        }
+        else if (counts[value] === 3) {
+            if (value == 1) {
+                roundScore += 1000;
+            }
+            else {
+                roundScore += 100 * value;
+            }
+        }
+        else if (counts[value] === 4) {
+            roundScore += 1000;
+        }
+        else if (counts[value] === 5) {
+            roundScore += 2000;
+        }
+        else if (counts[value] === 6) {
+            roundScore += 3000;
+        }
     }
 
-    const threeOfAKind = Object.values(counts).filter(count => count === 3).length;
-    if (threeOfAKind === 2) {
-        roundScore += 2500;
-        freshDice();
-    }
-
-    const fourOfAKind = Object.values(counts).filter(count => count === 4).length;
-    if (fourOfAKind === 1) {
-        roundScore += 1000;
-    }
-    else if (fourOfAKind === 1 && pairs === 1) {
-        roundScore += 1500;
-        freshDice();
-    }
-
-    const fiveOfAKind = Object.values(counts).filter(count => count === 5).length;
-    if (fiveOfAKind === 1) {
-        roundScore += 2000;
-    }
-    
     updateScoreDisplay();
 }
+
 
 
 
@@ -140,6 +145,8 @@ document.getElementById("pass").addEventListener("click", function() {
     updateScoreDisplay();
     displayDice();
 });
+
+
 
 displayDice();
 updateScoreDisplay();
