@@ -1,6 +1,6 @@
 let totalScore = 0;
-let realRoundScore = 0;
 let roundScore = 0;
+let handScore = 0;
 let cpuScore = 0;
 const rollSound = new Audio("dice-rolling.mp3");
 let currentDice = [];
@@ -58,7 +58,7 @@ function displayDice() {
 }
 
 function calculateScore() {
-    roundScore = 0;
+    handScore = 0;
 
     // Filter out only the selected dice
     const selectedDice = currentDice.filter(die => die.keep);
@@ -67,9 +67,7 @@ function calculateScore() {
     const sortedDice = selectedDice.map(die => die.value).sort((a, b) => a - b);
 
     if (sortedDice.join('') === '123456') {
-        roundScore += 1500;
-        updateScoreDisplay();
-        displayDice();
+        handScore = 1500;
         freshDice();
         return;
     }
@@ -80,31 +78,73 @@ function calculateScore() {
         counts[die.value] = counts[die.value] ? counts[die.value] + 1 : 1;
     }
 
+    let pairs = 0;
+    let threeOfAKind = 0;
+
     for (const value in counts) {
-        if (counts[value] < 3) {
+        if (counts[value] === 2) {
+            pairs += 1;
+        }
+        else if (counts[value] === 3) {
+            threeOfAKind += 1;
+        }
+    }
+
+    if (pairs === 3) {
+        handScore = 1500;
+        freshDice();
+        return;
+    }
+    else if (threeOfAKind === 2) {
+        handScore = 2500;
+        freshDice();
+        return;
+    }
+
+    for (const value in counts) {
+        if (counts[value] === 1) {
             if (value == 1) {
-                roundScore += counts[value] * 100;
+                handScore += 100;
             }
             else if (value == 5) {
-                roundScore += counts[value] * 50;
+                handScore += 50;
+            }
+        }
+        else if (counts[value] === 2) {
+            if (value == 1) {
+                handScore += 200;
+            }
+            else if (value == 5) {
+                handScore += 100;
             }
         }
         else if (counts[value] === 3) {
             if (value == 1) {
-                roundScore += 1000;
+                handScore += 1000;
             }
             else {
-                roundScore += 100 * value;
+                handScore += 100 * value;
             }
         }
         else if (counts[value] === 4) {
-            roundScore += 1000;
+            handScore += 1000;
+            if (pairs === 1) {
+                handScore += 500;
+                if (counts[1] === 2) {
+                    handScore -= 200;
+                }
+                else if (counts[5] === 2) {
+                    handScore -= 100;
+                }
+            freshDice();
+            }
         }
         else if (counts[value] === 5) {
-            roundScore += 2000;
+            handScore += 2000;
         }
         else if (counts[value] === 6) {
-            roundScore += 3000;
+            handScore += 3000;
+            freshDice();
         }
     }
 
@@ -112,14 +152,12 @@ function calculateScore() {
 }
 
 
-
-
 function updateScoreDisplay() {
     const currentScoreElement = document.getElementById("round_score");
     const totalScoreElement = document.getElementById("total_score");
     const cpuScoreElement = document.getElementById("cpu_score");
 
-    currentScoreElement.innerHTML = roundScore;
+    currentScoreElement.innerHTML = handScore;
     totalScoreElement.innerHTML = totalScore;
     cpuScoreElement.innerHTML = cpuScore;
 }
@@ -131,15 +169,28 @@ function initializeGame() {
 }
 
 document.getElementById("roll").addEventListener("click", function() {
+    calculateScore();
     if (currentDice.length == 0) {
         initializeGame();
+    }
+
+    else if (handScore === 0) {
+        alert("Roll failed to score!");
+        currentDice = [];
+        rollAllDice();
+        updateScoreDisplay();
+        displayDice();
     }
     rollAllDice();
 });
 
 document.getElementById("pass").addEventListener("click", function() {
-    totalScore += roundScore;
-    roundScore = 0;
+    if (handScore < 1000 && totalScore === 0) {
+        alert("Failed to reach 1000 points!");
+        handScore = 0;
+    }
+    totalScore += handScore;
+    handScore = 0;
     currentDice = [];
     rollAllDice();
     updateScoreDisplay();
