@@ -13,27 +13,23 @@
         <h1>Welcome to my online Farkle app!</h1>
         <h2>You will try your luck against the CPU</h2>
         <h3>Game Rules:</h3>
-        <ul style="columns: 2;">
+        <ul style="columns: 1;">
             <li>Roll 6 die, choose which scoring die to keep, according to this scoring:</li>
-                <ul style="columns: 2;">
+                <ul style="columns: 3;">
                     <li>5 = 50 points</li>
                     <li>1 = 100 points</li>
                     <li>3 of a kind of 2-6 = 100 x that number</li>
                     <li>3 of a kind of 1's = 1,000 pionts</li>
                     <li>4 of a kind = 1,000 points</li>
-                    <li>5 of a kind = 2,000 points</li>
-                    <li>6 of a kind = 3,000 points</li> 
                     <li>Straight (1-6) = 1,500 points</li>
                     <li>3 pairs = 1,500 points</li>
                     <li>4 of a kind + pair = 1,500 points</li>
+                    <li>5 of a kind = 2,000 points</li>
                     <li>2 x 3 of a kind = 2,500 points</li>
+                    <li>6 of a kind = 3,000 points</li> 
                 </ul>
-            <li>Any roll that has at least one scoring die may be improved upon. Set aside the scoring die that you'd like to keep, and reroll the others</li>
             <li>If all available die are rolled as scoring die, you may pick them all up and keep rolling!</li>
-            <li>To get your score banked for the first time, your roll must score at least 1,000 points</li>
-            <li>If you do not score at least 1,000 points, and/or you do not roll any scoring die, your score for that turn is 0</li>
-            <li><i>Once you have at least 1,000 points,</i> you may build off the score of the previous players roll!</li>
-            <li>First player to 10,000 points wins!</li>
+            <li>See how high of a score you can get in one continuous hand</li>
         </ul>
 
         <div id="gameboard">
@@ -44,11 +40,9 @@
             <br>
 
             <button id="roll" style="margin-top: 20px;">Roll Dice</button>
-            <button id="pass" style="margin-top: 20px;">Pass Dice</button>
-
+            <h3 style="margin-top: 20px;">Roll Score: <span id="roll_score"></span></h3>
             <h3 style="margin-top: 20px;">Round Score: <span id="round_score"></span></h3>
-            <h3>Total Score: <span id="total_score"></span></h3>
-            <h3>CPU Score: <span id="cpu_score"></span></h3>
+            <h3>High Score: <span id="high_score"></span></h3>
 
         </div>
         <script src="script.js"></script>

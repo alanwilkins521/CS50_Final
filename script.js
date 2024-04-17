@@ -1,7 +1,6 @@
-let totalScore = 0;
 let roundScore = 0;
-let handScore = 0;
-let cpuScore = 0;
+let rollScore = 0;
+let highScore = 0;
 const rollSound = new Audio("dice-rolling.mp3");
 let currentDice = [];
 
@@ -26,13 +25,11 @@ function freshDice() {
     })
 
     alert("Fresh dice!");
+    roundScore += rollScore;
     updateScoreDisplay();
     displayDice();
 }
 
-function endTurn() {
-
-}
 
 function displayDice() {
     const diceContainer = document.getElementById("dice-container");
@@ -50,15 +47,16 @@ function displayDice() {
         dieImg.addEventListener("click", () => {
             currentDice[index].keep = !currentDice[index].keep;
             displayDice();
-            calculateScore();
+            calculateRollScore();
+            updateScoreDisplay();
         });
 
         diceContainer.appendChild(dieImg);
     });
 }
 
-function calculateScore() {
-    handScore = 0;
+function calculateRollScore() {
+    rollScore = 0;
 
     // Filter out only the selected dice
     const selectedDice = currentDice.filter(die => die.keep);
@@ -67,7 +65,7 @@ function calculateScore() {
     const sortedDice = selectedDice.map(die => die.value).sort((a, b) => a - b);
 
     if (sortedDice.join('') === '123456') {
-        handScore = 1500;
+        rollScore = 1500;
         freshDice();
         return;
     }
@@ -91,12 +89,12 @@ function calculateScore() {
     }
 
     if (pairs === 3) {
-        handScore = 1500;
+        rollScore = 1500;
         freshDice();
         return;
     }
     else if (threeOfAKind === 2) {
-        handScore = 2500;
+        rollScore = 2500;
         freshDice();
         return;
     }
@@ -104,99 +102,98 @@ function calculateScore() {
     for (const value in counts) {
         if (counts[value] === 1) {
             if (value == 1) {
-                handScore += 100;
+                rollScore += 100;
             }
             else if (value == 5) {
-                handScore += 50;
+                rollScore += 50;
             }
         }
         else if (counts[value] === 2) {
             if (value == 1) {
-                handScore += 200;
+                rollScore += 200;
             }
             else if (value == 5) {
-                handScore += 100;
+                rollScore += 100;
             }
         }
         else if (counts[value] === 3) {
             if (value == 1) {
-                handScore += 1000;
+                rollScore += 1000;
             }
             else {
-                handScore += 100 * value;
+                rollScore += 100 * value;
             }
         }
         else if (counts[value] === 4) {
-            handScore += 1000;
+            rollScore += 1000;
             if (pairs === 1) {
-                handScore += 500;
+                rollScore += 500;
                 if (counts[1] === 2) {
-                    handScore -= 200;
+                    rollScore -= 200;
                 }
                 else if (counts[5] === 2) {
-                    handScore -= 100;
+                    rollScore -= 100;
                 }
             freshDice();
             }
+            else if (counts[1] === 1 && counts[5] === 1) {
+                freshDice();
+            }
         }
         else if (counts[value] === 5) {
-            handScore += 2000;
+            rollScore += 2000;
         }
         else if (counts[value] === 6) {
-            handScore += 3000;
+            rollScore += 3000;
             freshDice();
         }
     }
-
     updateScoreDisplay();
 }
 
-
 function updateScoreDisplay() {
-    const currentScoreElement = document.getElementById("round_score");
-    const totalScoreElement = document.getElementById("total_score");
-    const cpuScoreElement = document.getElementById("cpu_score");
+    const rollScoreElement = document.getElementById("roll_score");
+    const roundScoreElement = document.getElementById("round_score");
+    const highScoreElement = document.getElementById("high_score");
 
-    currentScoreElement.innerHTML = handScore;
-    totalScoreElement.innerHTML = totalScore;
-    cpuScoreElement.innerHTML = cpuScore;
+    rollScoreElement.innerHTML = rollScore;
+    roundScoreElement.innerHTML = roundScore;
+    highScoreElement.innerHTML = highScore
 }
 
 function initializeGame() {
     for (i = 0; i < 6; i++) {
         currentDice.push({ value: rollDie(), keep: false });
     }
+    displayDice();
+    rollSound.play();
 }
 
 document.getElementById("roll").addEventListener("click", function() {
-    calculateScore();
+    const unselectedDice = currentDice.filter(die => !die.keep);
     if (currentDice.length == 0) {
         initializeGame();
     }
-
-    else if (handScore === 0) {
+    else if (rollScore === 0) {
         alert("Roll failed to score!");
+        if (roundScore > highScore) {
+            highScore = roundScore;
+        }
+        roundScore = 0;
         currentDice = [];
-        rollAllDice();
         updateScoreDisplay();
-        displayDice();
     }
-    rollAllDice();
-});
-
-document.getElementById("pass").addEventListener("click", function() {
-    if (handScore < 1000 && totalScore === 0) {
-        alert("Failed to reach 1000 points!");
-        handScore = 0;
+    else {
+        roundScore += rollScore;
+        rollScore = 0;
+        updateScoreDisplay();
+        currentDice = unselectedDice;
+        if (currentDice.length === 0) {
+            freshDice();
+        }
+        rollAllDice();
     }
-    totalScore += handScore;
-    handScore = 0;
-    currentDice = [];
-    rollAllDice();
-    updateScoreDisplay();
-    displayDice();
 });
-
 
 
 displayDice();
